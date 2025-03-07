@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Details</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="container mt-5">
+    
+    <h3>Customer Information</h3>
+    <p><strong>ID:</strong> <span id="custID"></span></p>
+    <p><strong>Name:</strong> <span id="custName"></span></p>
+    <p><strong>Gold Weight:</strong> <span id="custGold"></span></p>
+    <p><strong>Loan Amount:</strong> ₹<span id="custLoan"></span></p>
+    <p><strong>Rate of Interest:</strong> <span id="custInterest"></span></p>
+    <p><strong>Interest Rate:</strong> 2% Monthly</p>
+    
+    <p><strong>Gold Image:</strong></p>
+    <img id="goldImage" src="" alt="Gold Image" class="img-fluid" style="max-width: 300px; display: none;">
+    
+    <label for="months">Track Loan for How Many Months?</label>
+    <input type="number" id="months" class="form-control" placeholder="Enter months" min="1" required>
+    <button class="btn btn-primary mt-3" onclick="trackLoan()">Track Loan</button>
+    
+    <h4 class="mt-4">EMI Details</h4>
+    <p><strong>Total Amount with EMI:</strong> ₹<span id="totalWithEMI"></span></p>
+    <p><strong>EMI per Month:</strong> ₹<span id="emiPerMonth"></span></p>
+
+    <div id="chartContainer" class="d-flex justify-content-center mt-3" style="display: none;">
+        <canvas id="loanPieChart" style="max-width: 400px;"></canvas> 
+    </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            function getQueryParam(param) {
+                const urlParams = new URLSearchParams(window.location.search);
+                return urlParams.get(param);
+            }
+    
+            let customerId = getQueryParam("customerId");
+            if (!customerId) {
+                alert("No customer ID provided!");
+                window.location.href = "index.html"; 
+                return;
+            }
+    
+            let customers = JSON.parse(localStorage.getItem("customers")) || [];
+            let customer = customers.find(c => c.customerId === customerId);
+    
+            if (customer) {
+                document.getElementById("custID").textContent = customer.customerId;
+                document.getElementById("custName").textContent = customer.customerName;
+                document.getElementById("custGold").textContent = customer.goldWeight + "g";
+                document.getElementById("custLoan").textContent = customer.loanAmount;
+                document.getElementById("custInterest").textContent = "₹" + (customer.loanAmount * 0.02).toFixed(2);
+                
+                if (customer.goldImage) {
+                    let goldImgElement = document.getElementById("goldImage");
+                    goldImgElement.src = customer.goldImage;
+                    goldImgElement.style.display = "block";
+                }
+            } else {
+                alert("Customer not found!");
+                window.location.href = "index.html";
+            }
+        });
+    
+        function trackLoan() {
+            let months = parseInt(document.getElementById("months").value);
+            let loan = parseInt(document.getElementById("custLoan").textContent);
+            if (isNaN(months) || months <= 0) {
+                alert("Please enter a valid number of months.");
+                return;
+            }
+    
+            let interestRate = 0.02;
+            let totalInterest = loan * interestRate * months;
+            let totalWithEMI = loan + totalInterest;
+            let emiPerMonth = totalWithEMI / months;
+
+            document.getElementById("totalWithEMI").textContent = totalWithEMI.toFixed(2);
+            document.getElementById("emiPerMonth").textContent = emiPerMonth.toFixed(2);
+
+            // Show chart container after calculation
+            document.getElementById("chartContainer").style.display = "block";
+
+            let ctx = document.getElementById("loanPieChart").getContext("2d");
+            if (window.loanChartInstance) {
+                window.loanChartInstance.destroy();
+            }
+            window.loanChartInstance = new Chart(ctx, {
+                type: "pie",
+                data: {
+                    labels: ["Principal Amount", "Total Interest"],
+                    datasets: [{
+                        data: [loan, totalInterest],
+                        backgroundColor: ["green", "red"]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+    </script>
+</body>
+</html>
