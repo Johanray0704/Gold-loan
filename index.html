@@ -135,7 +135,9 @@ function loadCustomers() {
                 <td>₹${customer.loanAmount}</td>
                 <td>${customer.loanDate}</td>
                 <td>
-                    <a href="customerinf.html?customerId=${customer.customerId}&customerName=${customer.customerName}&goldWeight=${customer.goldWeight}&loanAmount=${customer.loanAmount}&loanDate=${customer.loanDate}&goldImage=${customer.goldImage}" class="btn btn-info">View</a>
+                    <a href="./customerinf.html?customerId=${customer.customerId}&customerName=${customer.customerName}&goldWeight=${customer.goldWeight}&loanAmount=${customer.loanAmount}&loanDate=${customer.loanDate}&goldImage=${customer.goldImage}" class="btn btn-info">View</a>
+                   <a href="./customerinf.html#${customer.customerId}" class="btn btn-info">View</a>
+
                     <button class="btn btn-danger" onclick="deleteCustomer(${index})">Delete</button>
                 </td>
             </tr>`;
